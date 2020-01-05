@@ -47,7 +47,7 @@ extract_regex = r"(?:(?:'(Ace-(?:SP&L|SBS|SCFS))'![A-Z]\$?(\d{1,}))|[A-Z]\$?(\d{
 #     if i == 10:
 #         break
 
-for cells in sa_ratio.iter_rows(min_col=2, max_col=19, min_row=39, max_row=39):
+for cells in sa_ratio.iter_rows(min_col=2, max_col=19):
     for cell in cells:
         if type(cell) == ReadOnlyCell and cell.value != None and re.match(r'^-?\d+(?:\.\d+)?$', str(cell.value)) is None:
             if len(list(re.findall(root_pattern_regex, cell.value))) > 0:
@@ -56,32 +56,21 @@ for cells in sa_ratio.iter_rows(min_col=2, max_col=19, min_row=39, max_row=39):
                 contents = list(filter(None, re.split(
                     root_pattern_regex, cell.value)))
                 contents.pop(0)
-                print(cell.value, contents)
                 for i in range(len(contents)):
                     expression = contents[i]
                     if len(list(re.findall(extract_regex, expression))) > 0:
                         extracted_expression = list(
                             filter(None, list(re.findall(extract_regex, expression)[0])))
-                        print(extracted_expression)
                         if (len(extracted_expression) > 1):
                             if int(
                                     extracted_expression[1]) in row_dict[extracted_expression[0]]:
-                                content = row_dict[extracted_expression[0]][int(
+                                contents[i] = row_dict[extracted_expression[0]][int(
                                     extracted_expression[1])]
-                                if len(list(re.findall(root_pattern_regex, content))) > 0:
-                                    print(list(re.findall(root_pattern_regex, row_dict[extracted_expression[0]][int(
-                                        extracted_expression[1])])))
-                                contents[i] = content
                         else:
                             if int(
                                     extracted_expression[0]) in row_dict['SA-Ratios']:
-                                content = row_dict['SA-Ratios'][int(
+                                contents[i] = row_dict['SA-Ratios'][int(
                                     extracted_expression[0])]
-                                if len(list(re.findall(root_pattern_regex, content))) > 0:
-                                    print(list(re.findall(root_pattern_regex, row_dict[extracted_expression[0]][int(
-                                        extracted_expression[1])])))
-                                contents[i] = content
-                print(contents)
                 wb["{}{}".format(
                     "C", str(cell.row))] = ' '.join(contents)
                 break

@@ -47,6 +47,24 @@ extract_regex = r"(?:(?:'(Ace-(?:SP&L|SBS|SCFS))'![A-Z]\$?(\d{1,}))|[A-Z]\$?(\d{
 #     if i == 10:
 #         break
 
+
+def find_name(extracted_expression):
+    if len(list(re.findall(extract_regex, extracted_expression))) == 0:
+        return extracted_expression
+    extracted_expression = list(
+        filter(None, list(re.findall(extract_regex, extracted_expression)[0])))
+    if len(extracted_expression) > 1:
+        if int(extracted_expression[1]) in row_dict[extracted_expression[0]]:
+            return find_name(row_dict[extracted_expression[0]][int(extracted_expression[1])])
+        else:
+            return extracted_expression[1]
+    else:
+        if int(extracted_expression[0]) in row_dict['SA-Ratios']:
+            return find_name(row_dict['SA-Ratios'][int(extracted_expression[0])])
+        else:
+            return extracted_expression[0]
+
+
 for cells in sa_ratio.iter_rows(min_col=2, max_col=19, min_row=7):
     for cell in cells:
         if type(cell) == ReadOnlyCell and cell.value != None and re.match(r'^-?\d+(?:\.\d+)?$', str(cell.value)) is None:
@@ -55,30 +73,7 @@ for cells in sa_ratio.iter_rows(min_col=2, max_col=19, min_row=7):
                     root_pattern_regex, cell.value)))
                 contents.pop(0)
                 for i in range(len(contents)):
-                    expression = contents[i]
-                    if len(list(re.findall(extract_regex, expression))) > 0:
-                        extracted_expression = list(
-                            filter(None, list(re.findall(extract_regex, expression)[0])))
-                        if (len(extracted_expression) > 1):
-                            if int(
-                                    extracted_expression[1]) in row_dict[extracted_expression[0]]:
-                                contents[i] = row_dict[extracted_expression[0]][int(
-                                    extracted_expression[1])]
-                        else:
-                            if int(
-                                    extracted_expression[0]) in row_dict['SA-Ratios']:
-                                content = row_dict['SA-Ratios'][int(
-                                    extracted_expression[0])]
-                                if len(list(re.findall(extract_regex, content))) > 0:
-                                    sub_content = list(
-                                        filter(None, list(re.findall(extract_regex, content)[0])))
-                                    if len(sub_content) > 1:
-                                        content = row_dict[sub_content[0]][int(
-                                            sub_content[1])]
-                                    else:
-                                        content = row_dict['SA-Ratios'][int(
-                                            sub_content[0])]
-                                contents[i] = content
+                    contents[i] = find_name(contents[i])
                 wb["{}{}".format(
                     "C", str(cell.row))] = ' '.join(contents)
                 break

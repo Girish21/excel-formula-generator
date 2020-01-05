@@ -47,7 +47,7 @@ extract_regex = r"(?:(?:'(Ace-(?:SP&L|SBS|SCFS))'![A-Z]\$?(\d{1,}))|[A-Z]\$?(\d{
 #     if i == 10:
 #         break
 
-for cells in sa_ratio.iter_rows(min_col=2, max_col=19):
+for cells in sa_ratio.iter_rows(min_col=2, max_col=19, min_row=5):
     for cell in cells:
         if type(cell) == ReadOnlyCell and cell.value != None and re.match(r'^-?\d+(?:\.\d+)?$', str(cell.value)) is None:
             if len(list(re.findall(root_pattern_regex, cell.value))) > 0:

@@ -47,12 +47,10 @@ extract_regex = r"(?:(?:'(Ace-(?:SP&L|SBS|SCFS))'![A-Z]\$?(\d{1,}))|[A-Z]\$?(\d{
 #     if i == 10:
 #         break
 
-for cells in sa_ratio.iter_rows(min_col=2, max_col=19, min_row=5):
+for cells in sa_ratio.iter_rows(min_col=2, max_col=19, min_row=7):
     for cell in cells:
         if type(cell) == ReadOnlyCell and cell.value != None and re.match(r'^-?\d+(?:\.\d+)?$', str(cell.value)) is None:
             if len(list(re.findall(root_pattern_regex, cell.value))) > 0:
-                # print(list(filter(None, re.split(
-                #     root_pattern_regex, cell.value))))
                 contents = list(filter(None, re.split(
                     root_pattern_regex, cell.value)))
                 contents.pop(0)
@@ -69,8 +67,18 @@ for cells in sa_ratio.iter_rows(min_col=2, max_col=19, min_row=5):
                         else:
                             if int(
                                     extracted_expression[0]) in row_dict['SA-Ratios']:
-                                contents[i] = row_dict['SA-Ratios'][int(
+                                content = row_dict['SA-Ratios'][int(
                                     extracted_expression[0])]
+                                if len(list(re.findall(extract_regex, content))) > 0:
+                                    sub_content = list(
+                                        filter(None, list(re.findall(extract_regex, content)[0])))
+                                    if len(sub_content) > 1:
+                                        content = row_dict[sub_content[0]][int(
+                                            sub_content[1])]
+                                    else:
+                                        content = row_dict['SA-Ratios'][int(
+                                            sub_content[0])]
+                                contents[i] = content
                 wb["{}{}".format(
                     "C", str(cell.row))] = ' '.join(contents)
                 break

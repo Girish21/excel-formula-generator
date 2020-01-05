@@ -1,8 +1,10 @@
 import json
-from openpyxl import load_workbook
+import re
+from openpyxl import load_workbook, Workbook
 from openpyxl.cell.read_only import ReadOnlyCell
+write_book = Workbook()
+wb = write_book.active
 wb2 = load_workbook('NF-SA Template 160519.xlsx', read_only=True)
-print(wb2.sheetnames)
 sa_ratio = wb2['SA-Ratios']
 helper_sheets = ['Ace-SP&L', 'Ace-SBS', 'Ace-SCFS']
 max_row = sa_ratio.max_row
@@ -23,6 +25,70 @@ for sheet in helper_sheets:
             sheet_cols[cell[0].row] = cell[0].value.strip()
     row_dict[sheet] = sheet_cols
 
+root_pattern_regex = r"('(?:(?:Ace-(?:SP&L|SBS|SCFS))'![A-Z]\$?(?:(?:[0-9])+))|(?:[A-Z]\$?(?:(?:[0-9])+)))(\+|\-|\*|\/)?"
+extract_regex = r"(?:(?:'(Ace-(?:SP&L|SBS|SCFS))'![A-Z]\$?(\d{1,}))|[A-Z]\$?(\d{1,}))"
+# i = 0
+# for row in sa_ratio.rows:
+#     canIterate = False
+#     for cell in row:
+#         if type(cell) == ReadOnlyCell and cell.value != None:
+#             if cell.column == '2' and cell.value != None:
+#                 canIterate = True
+#             if  len(list(re.findall(root_pattern_regex, cell.value))) > 0:
+#                 contents = list(filter(None, re.split(
+#                     root_pattern_regex, cell.value)))
+#                 for expression in contents:
+#                     if re.match(root_pattern_regex, expression):
+#                         print(cell.coordinate, expression)
+#                 break
+#             else:
+#                 wb[cell.coordinate] = cell.value
+#     i += 1
+#     if i == 10:
+#         break
+
+for cells in sa_ratio.iter_rows(min_col=2, max_col=19, min_row=39, max_row=39):
+    for cell in cells:
+        if type(cell) == ReadOnlyCell and cell.value != None and re.match(r'^-?\d+(?:\.\d+)?$', str(cell.value)) is None:
+            if len(list(re.findall(root_pattern_regex, cell.value))) > 0:
+                # print(list(filter(None, re.split(
+                #     root_pattern_regex, cell.value))))
+                contents = list(filter(None, re.split(
+                    root_pattern_regex, cell.value)))
+                contents.pop(0)
+                print(cell.value, contents)
+                for i in range(len(contents)):
+                    expression = contents[i]
+                    if len(list(re.findall(extract_regex, expression))) > 0:
+                        extracted_expression = list(
+                            filter(None, list(re.findall(extract_regex, expression)[0])))
+                        print(extracted_expression)
+                        if (len(extracted_expression) > 1):
+                            if int(
+                                    extracted_expression[1]) in row_dict[extracted_expression[0]]:
+                                content = row_dict[extracted_expression[0]][int(
+                                    extracted_expression[1])]
+                                if len(list(re.findall(root_pattern_regex, content))) > 0:
+                                    print(list(re.findall(root_pattern_regex, row_dict[extracted_expression[0]][int(
+                                        extracted_expression[1])])))
+                                contents[i] = content
+                        else:
+                            if int(
+                                    extracted_expression[0]) in row_dict['SA-Ratios']:
+                                content = row_dict['SA-Ratios'][int(
+                                    extracted_expression[0])]
+                                if len(list(re.findall(root_pattern_regex, content))) > 0:
+                                    print(list(re.findall(root_pattern_regex, row_dict[extracted_expression[0]][int(
+                                        extracted_expression[1])])))
+                                contents[i] = content
+                print(contents)
+                wb["{}{}".format(
+                    "C", str(cell.row))] = ' '.join(contents)
+                break
+            else:
+                wb[cell.coordinate] = cell.value
+
+write_book.save(filename="test.xlsx")
 
 # reg=r"'(?:Ace-(?:SP&L|SBS|SCFS))'![A-Z]\$?(?:(?:[0-9])+)(\+|\-|\*|\/)"
 # print(re.findall(reg, "'Ace-SP&L'!C20/'Ace-SP&L'!C$6*'Ace-SP&L'!C$6"))

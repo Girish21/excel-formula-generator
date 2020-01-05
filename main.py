@@ -7,7 +7,6 @@ wb = write_book.active
 wb2 = load_workbook('NF-SA Template 160519.xlsx', read_only=True)
 sa_ratio = wb2['SA-Ratios']
 helper_sheets = ['Ace-SP&L', 'Ace-SBS', 'Ace-SCFS']
-max_row = sa_ratio.max_row
 
 row_dict = {}
 
@@ -65,20 +64,40 @@ def find_name(extracted_expression):
             return extracted_expression[0]
 
 
+row = 1
 for cells in sa_ratio.iter_rows(min_col=2, max_col=19, min_row=7):
     for cell in cells:
         if type(cell) == ReadOnlyCell and cell.value != None and re.match(r'^-?\d+(?:\.\d+)?$', str(cell.value)) is None:
-            if len(list(re.findall(root_pattern_regex, cell.value))) > 0:
+            if cell.column != 2 and len(list(re.findall(root_pattern_regex, cell.value))) > 0:
                 contents = list(filter(None, re.split(
                     root_pattern_regex, cell.value)))
-                contents.pop(0)
+                parsed_first_part = list(filter(None, re.findall(
+                    r"=(SUM\(|AVERAGE\(|\()", contents[0])))
+                if len(parsed_first_part) > 0:
+                    contents[0] = parsed_first_part[0]
+                else:
+                    contents.pop(0)
                 for i in range(len(contents)):
                     contents[i] = find_name(contents[i])
                 wb["{}{}".format(
-                    "C", str(cell.row))] = ' '.join(contents)
+                    "B", str(row))] = ' '.join(contents)
+                row += 1
                 break
             else:
-                wb[cell.coordinate] = cell.value
+                if len(list(re.findall(root_pattern_regex, cell.value))) > 0:
+                    contents = list(filter(None, re.split(
+                        root_pattern_regex, cell.value)))
+                    parsed_first_part = list(filter(None, re.findall(
+                        r"=(SUM\(|AVERAGE\(|\()", contents[0])))
+                    if len(parsed_first_part) > 0:
+                        contents[0] = parsed_first_part[0]
+                    else:
+                        contents.pop(0)
+                    for i in range(len(contents)):
+                        contents[i] = find_name(contents[i])
+                    wb["A{}".format(str(row))] = ' '.join(contents)
+                else:
+                    wb["A{}".format(str(row))] = cell.value
 
 write_book.save(filename="test.xlsx")
 

@@ -32,7 +32,7 @@ def find_name(extracted_expression, root_dict):
             # if the pair is in dict, recursively call find_name to check if it is still of type formula
             return find_name(root_dict[extracted_expression[0]][int(extracted_expression[1])], root_dict)
         else:
-            # fil-safe return
+            # fail-safe return
             return extracted_expression[1]
     else:
         # the expression is of type D$20, E3, etc. thus refering the SA_Ratios sheet
@@ -40,7 +40,7 @@ def find_name(extracted_expression, root_dict):
             # if the pair is in dict, recursively call find_name to check if it is still of type formula
             return find_name(root_dict['SA-Ratios'][int(extracted_expression[0])], root_dict)
         else:
-            # fil-safe return
+            # fail-safe return
             return extracted_expression[0]
 
 

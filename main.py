@@ -147,7 +147,7 @@ def generate_dict(book, root_dict, sheet_list, min_col, max_col, min_row):
         root_dict[sheet] = temp_dict
 
 
-def main():
+def _main():
     # Open workbook to write to
     write_book = Workbook()
     active_write_book = write_book.active
@@ -171,4 +171,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    _main()

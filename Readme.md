@@ -4,5 +4,5 @@ This is my submission for the take-home assessment of generating excel formula i
 
 ## Technology Used
 
->1.Python(3.7)
->2.openpyxl(3)
+> 1. Python(3.7)
+> 2. openpyxl(3)

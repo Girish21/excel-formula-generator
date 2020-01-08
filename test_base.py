@@ -28,7 +28,11 @@ class TestBaseFunctionality(unittest.TestCase):
                 self.assertEqual(split_list, value)
 
     def test_formula_cleaner(self):
-        pass
+        self.assertEqual(main.clean_formula(["="]), [])
+        self.assertEqual(main.clean_formula(["=SUM("]), ["SUM("])
+        self.assertEqual(main.clean_formula(
+            ["=365*AVERAGE("]), ["365*AVERAGE("])
+        self.assertEqual(main.clean_formula(["=("]), ["("])
 
     def test_dict_generator(self):
         root_dict = {}

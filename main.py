@@ -4,9 +4,9 @@ from openpyxl import load_workbook, Workbook
 from openpyxl.cell.read_only import ReadOnlyCell
 
 # regex to capture patterns like 'Ace-SP&L'!C20, ('Ace-SP&L'!C$120*), C356, D$89
-root_pattern_regex = r"('(?:(?:Ace-(?:SP&L|SBS|SCFS))'![A-Z]\$?(?:(?:[0-9])+))|(?:[A-Z]\$?(?:(?:[0-9])+)))(\+|\-|\*|\/)?"
+root_pattern_regex = r"('(?:(?:Ace-(?:SP&L|SBS|SCFS))'![A-Z]+\$?(?:(?:[0-9])+))|(?:[A-Z]+\$?(?:(?:[0-9])+)))(\+|\-|\*|\/)?"
 # regex to extract (Ace-SP&L, 20) from 'Ace-SP&L'!C20, 439 from D$439
-extract_regex = r"(?:(?:'(Ace-(?:SP&L|SBS|SCFS))'![A-Z]\$?(\d{1,}))|[A-Z]\$?(\d{1,}))"
+extract_regex = r"(?:(?:'(Ace-(?:SP&L|SBS|SCFS))'![A-Z]+\$?(\d{1,}))|[A-Z]+\$?(\d{1,}))"
 
 
 """

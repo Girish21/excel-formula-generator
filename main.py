@@ -10,7 +10,7 @@ extract_regex = r"(?:(?:'(Ace-(?:SP&L|SBS|SCFS))'![A-Z]+\$?(\d{1,}))|[A-Z]+\$?(\
 
 
 """
-    method to recursively find the name of the row for the given excel coordinate
+    function to recursively find the name of the row for the given excel coordinate
     @params
         extracted_expression - excel coordinate (eg: C40, F$567, 'Ace-SP&L'!C20)
         root_dict - ref to root dictionary to fetch row name
@@ -45,7 +45,7 @@ def find_name(extracted_expression, root_dict):
 
 
 """
-    helper method to parse the formula and extract string matching patterns such as SUM( from =SUM(,
+    helper function to parse the formula and extract string matching patterns such as SUM( from =SUM(,
     365*AVERAGE( from =365*AVERAGE( and remove '='
 
     @params
@@ -69,7 +69,7 @@ def clean_formula(contents):
 
 
 """
-    method to extract the target details from the given formula, parse it, 
+    function to extract the target details from the given formula, parse it, 
     and find the corresponding name of the cell the part is referring to
 
     @params
@@ -90,7 +90,7 @@ def format_formula(value, root_dict):
 
 
 """
-    method to build the target parsed excel
+    function to build the target parsed excel
     @params
         book - ref to the loaded excel book
         root_dict - ref to root dictionary
@@ -125,7 +125,7 @@ def build_excel(book, root_dict, dest_sheet_ref):
 
 
 """ 
-    method to generate a dictionary for faster lookup
+    function to generate a dictionary for faster lookup
     @params
         book - ref to the loaded excel book
         root_dict - ref to root dictionary

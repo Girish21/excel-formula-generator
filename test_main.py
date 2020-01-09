@@ -4,6 +4,7 @@ from openpyxl import load_workbook, Workbook
 
 
 class TestMainFunctionality(unittest.TestCase):
+    # open the book and generate the dictionary
     def setUp(self):
         # List of helper sheets needs to be parsed
         sheets = ['Ace-SP&L', 'Ace-SBS', 'Ace-SCFS']
@@ -17,6 +18,7 @@ class TestMainFunctionality(unittest.TestCase):
                            ['SA-Ratios'], 2, 2, 7)
         main.generate_dict(self.read_book, self.root_dict, sheets, 1, 1, 4)
 
+    # Unit Test to test the root functionality of the solution, to generate the textual representation of the given formula
     def test_formatter(self):
         self.assertEqual(main.format_formula(
             "='Ace-SP&L'!C20*C450", self.root_dict), ["Trading Sales", "*", "Ratio"])
@@ -35,6 +37,7 @@ class TestMainFunctionality(unittest.TestCase):
         self.assertTrue(main.format_formula("=365*AVERAGE(D930)/C929",
                                             self.root_dict), ['365*AVERAGE(', 'Inventories', ')/', 'COGS'])
 
+    # Unit Test to test if the function to find the textual representation of a given coordinate is returned properly
     def test_find_name(self):
         self.assertEqual(main.find_name("D42", self.root_dict), "Net Sales")
         # ref to another sheet

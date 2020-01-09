@@ -3,7 +3,7 @@ import copy
 from openpyxl import load_workbook, Workbook
 from openpyxl.cell.read_only import ReadOnlyCell
 
-# regex to capture patterns like 'Ace-SP&L'!C20, ('Ace-SP&L'!C$120*), C356, D$89
+# regex to capture patterns like 'Ace-SP&L'!C20, ('Ace-SP&L'!C$120*D$43), C356, D$89
 root_pattern_regex = r"('(?:(?:Ace-(?:SP&L|SBS|SCFS))'![A-Z]+\$?(?:(?:[0-9])+))|(?:[A-Z]+\$?(?:(?:[0-9])+)))(\+|\-|\*|\/)?"
 # regex to extract (Ace-SP&L, 20) from 'Ace-SP&L'!C20, 439 from D$439
 extract_regex = r"(?:(?:'(Ace-(?:SP&L|SBS|SCFS))'![A-Z]+\$?(\d{1,}))|[A-Z]+\$?(\d{1,}))"
@@ -13,12 +13,12 @@ extract_regex = r"(?:(?:'(Ace-(?:SP&L|SBS|SCFS))'![A-Z]+\$?(\d{1,}))|[A-Z]+\$?(\
     method to recursively find the name of the row for the given excel coordinate
     @params
         extracted_expression - excel coordinate (eg: C40, F$567, 'Ace-SP&L'!C20)
-        root_dict - ref to root dict to fetch row name
+        root_dict - ref to root dictionary to fetch row name
 """
 
 
 def find_name(extracted_expression, root_dict):
-    # check if extracted_expression is of type formula and can be splitted one more level, eg. =B$30
+    # check if extracted_expression is of type formula and can be split one more level, eg. =B$30
     if len(list(
             filter(None, list(re.findall(extract_regex, extracted_expression))))) == 0:
         # extracted_expression is the required string and it does not match the pattern, eg. Gross Sales
@@ -29,7 +29,7 @@ def find_name(extracted_expression, root_dict):
     if len(extracted_expression) > 1:
         # if the expression is of type 'Ace-SP&L'!C$120, extracted_expression will be ['Ace-SP&L', 120]
         if int(extracted_expression[1]) in root_dict[extracted_expression[0]]:
-            # if the pair is in dict, recursively call find_name to check if it is still of type formula
+            # if the pair is the dictionary, recursively call find_name to check if it is still of type formula
             return find_name(root_dict[extracted_expression[0]][int(extracted_expression[1])], root_dict)
         else:
             # fail-safe return
@@ -37,7 +37,7 @@ def find_name(extracted_expression, root_dict):
     else:
         # the expression is of type D$20, E3, etc. thus refering the SA_Ratios sheet
         if int(extracted_expression[0]) in root_dict['SA-Ratios']:
-            # if the pair is in dict, recursively call find_name to check if it is still of type formula
+            # if the pair is in the dictionary, recursively call find_name to check if it is still of type formula
             return find_name(root_dict['SA-Ratios'][int(extracted_expression[0])], root_dict)
         else:
             # fail-safe return
@@ -54,7 +54,7 @@ def find_name(extracted_expression, root_dict):
 
 
 def clean_formula(contents):
-    # create a copy for non-destructive inplace edits of the array
+    # create a copy for non-destructive in-place edits of the array
     temp_contents = copy.deepcopy(contents)
     # find if the 0th index is of the pattern =SUM(, =365*AVERAGE(
     parsed_first_part = list(filter(None, re.findall(
@@ -70,7 +70,7 @@ def clean_formula(contents):
 
 """
     method to extract the target details from the given formula, parse it, 
-    and find the corresponding name of the cell the part is refering to
+    and find the corresponding name of the cell the part is referring to
 
     @params
         value - cell's value
@@ -93,7 +93,7 @@ def format_formula(value, root_dict):
     method to build the target parsed excel
     @params
         book - ref to the loaded excel book
-        root_dict - ref to root dict
+        root_dict - ref to root dictionary
         dest_sheet_ref - ref to the target excel to write to
 """
 
@@ -110,7 +110,7 @@ def build_excel(book, root_dict, dest_sheet_ref):
                     # join the splitted array with updated names and generate the formula and write into B column
                     dest_sheet_ref["B{}".format(
                         str(row))] = ' '.join(contents)
-                    # row will be updated only if formula can be generated for the non highlighted row thus filtering literal and empty rows
+                    # row will be updated only if a formula can be generated for the non-highlighted row thus filtering literal and empty rows
                     row += 1
                     # break from looping through all the columns of a row if a formula is found
                     break
@@ -125,10 +125,10 @@ def build_excel(book, root_dict, dest_sheet_ref):
 
 
 """ 
-    method to generate dict for faster lookup
+    method to generate a dictionary for faster lookup
     @params
         book - ref to the loaded excel book
-        root_dict - ref to root dict
+        root_dict - ref to root dictionary
         sheet_list - list of sheets to parse and generate lookup
         min_col
         max_col
@@ -157,10 +157,10 @@ def _main():
 
     # List of helper sheets needs to be parsed
     sheets = ['Ace-SP&L', 'Ace-SBS', 'Ace-SCFS']
-    # Root dict to hold the parsed data
+    # Root dictionary to hold the parsed data
     root_dict = {}
 
-    # generate the dict for lookup of row names
+    # generate the dictionary for lookup of row names
     generate_dict(read_book, root_dict, ['SA-Ratios'], 2, 2, 7)
     generate_dict(read_book, root_dict, sheets, 1, 1, 4)
 
